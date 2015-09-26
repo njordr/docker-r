@@ -1,19 +1,18 @@
 ## Emacs, make this -*- mode: sh; -*-
- 
-FROM debian:testing
 
-## This handle reaches Carl and Dirk
-MAINTAINER "Carl Boettiger and Dirk Eddelbuettel" rocker-maintainers@eddelbuettel.com
+FROM ubuntu:14.04
 
-## Set a default user. Available via runtime flag `--user docker` 
+MAINTAINER "Giovanni Colapinto" alfheim@syshell.net
+
+## Set a default user. Available via runtime flag `--user docker`
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
-## User should also have & own a home directory (for rstudio or linked volumes to work properly). 
+## User should also have & own a home directory (for rstudio or linked volumes to work properly).
 RUN useradd docker \
 	&& mkdir /home/docker \
 	&& chown docker:docker /home/docker \
 	&& addgroup docker staff
 
-RUN apt-get update \ 
+RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		ed \
 		less \
@@ -31,20 +30,18 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 
-## Use Debian unstable via pinning -- new style via APT::Default-Release
-RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
-	&& echo 'APT::Default-Release "testing";' > /etc/apt/apt.conf.d/default
-
-ENV R_BASE_VERSION 3.2.2
+RUN \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9 && \
+    echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" > /etc/apt/sources.list.d/r.list
 
 ## Now install R and littler, and create a link for littler in /usr/local/bin
 ## Also set a default CRAN repo, and make sure littler knows about it too
 RUN apt-get update \
-	&& apt-get install -t unstable -y --no-install-recommends \
-		littler/unstable \
-		r-base=${R_BASE_VERSION}* \
-		r-base-dev=${R_BASE_VERSION}* \
-		r-recommended=${R_BASE_VERSION}* \
+	&& apt-get install -y --no-install-recommends \
+		littler \
+		r-base \
+		r-base-dev \
+		r-recommended \
         && echo 'options(repos = c(CRAN = "https://cran.rstudio.com/"), download.file.method = "libcurl")' >> /etc/R/Rprofile.site \
         && echo 'source("/etc/R/Rprofile.site")' >> /etc/littler.r \
 	&& ln -s /usr/share/doc/littler/examples/install.r /usr/local/bin/install.r \

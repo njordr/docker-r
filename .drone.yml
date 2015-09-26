@@ -1,8 +1,8 @@
-image: rocker/rstudio 
+image: njordr/rstudio
 script:
   - R --version
   - userconf.sh
 notify:
   email:
     recipients:
-      - cboettig@ropensci.org
+      - alfheim@syshell.net
