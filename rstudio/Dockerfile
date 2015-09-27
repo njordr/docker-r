@@ -1,7 +1,6 @@
-## Start with the official rocker image providing 'base R'
-FROM r-base:latest
-## This handle reaches Carl and Dirk
-MAINTAINER "Carl Boettiger and Dirk Eddelbuettel" rocker-maintainers@eddelbuettel.com
+FROM njordr/r-base:latest
+
+MAINTAINER "Giovanni Colapinto" alfheim@syshell.net
 
 ## Add RStudio binaries to PATH
 ENV PATH /usr/lib/rstudio-server/bin/:$PATH
@@ -12,7 +11,7 @@ ENV LANG en_US.UTF-8
 ## Symlink pandoc, pandoc-citeproc so they are available system-wide
 RUN rm -rf /var/lib/apt/lists/ \
   && apt-get update \
-  && apt-get install -y -t unstable --no-install-recommends \
+  && apt-get install -y --no-install-recommends \
     ca-certificates \
     file \
     git \
@@ -55,7 +54,6 @@ RUN usermod -l rstudio docker \
 
 ## User config and supervisord for persistant RStudio session
 COPY userconf.sh /usr/bin/userconf.sh
-COPY add-students.sh /usr/local/bin/add-students
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p /var/log/supervisor \
   && chgrp staff /var/log/supervisor \
